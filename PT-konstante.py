@@ -37,8 +37,8 @@ def fun_sevanje_W(cas):
         return 0
 
 test = np.linspace(12,19,500)
-plt.plot(test,funkcija_sevanja_W(test))
-plt.show()
+#plt.plot(test,funkcija_sevanja_W(test))
+#plt.show()
 
 
 
@@ -61,27 +61,81 @@ Celice se zacnejo steti pri notranji steni
 temperatura notraj je T_nes2
 Temperatura zunaj T_nes1
 """
-ρ_not =
-ρ_zun
-δ_x
-δ_t
-c_notranji
-c_zunanji
-prevodnost_notranja
-alfa_notranji
-T_nes2 = 22 + 273.15
-T_nes1 =
-ϵ_2
-ϵ_1
+ρ_not = 1200
+ρ_zun = 12
+δ_x = 0.03
+δ_t = 0.001
+c_notranji = 880
+c_zunanji = 1300
+prevodnost_1 = 0.04
+prevodnost_2 = 2
+alfa_notranji = 10
+alfa_zunanji = 50
+T_nes2 = 19
+T_nes1 = 35
+ϵ_2 = 0.9
+ϵ_1 = 0.9
+sevanje = 800
+σ = 5.67 * 10**-8
 
 
-def tem_stena(n, tem, trenutni_cas, λ, α, ρ, c)
+def tem_stena_not(n, tem, trenutni_cas, λ, α, ρ, c):
     """
     sevanje + konvekcija + prevod
     :return:
     """
-    T_nova = (δ_t/(ρ*δ_x**3 * c))*(λ*(tem[n+1]-tem[n])*δ_x +α*δ_x**2 *(T_nes2*tem[n])+ ϵ_2*σ*δ_x**2 *(T_nes2**4 - tem[n]**4)) +tem[n]
-    tok_v_hiso = α*δ_x**2 *(T_nes2*tem[n])+ ϵ_2*σ*δ_x**2 *(T_nes2**4 - tem[n]**4
+    T_nova = (δ_t*3600/(ρ*δ_x**3 * c))*(λ*(tem[n+1]-tem[n])*δ_x +α*δ_x**2 *(T_nes2-tem[n])+ ϵ_2*σ*δ_x**2 *((T_nes2+273)**4 - (tem[n]+273)**4)) +tem[n]
+    tok_v_hiso = α*δ_x**2 *(T_nes2-tem[n])+ ϵ_2*σ*δ_x**2 *((T_nes2+273)**4 - (tem[n]+273)**4)
     return T_nova, tok_v_hiso
 
-def temp_notranja(n, tem, trenutni_cas, λ, α, ρ, c)
+def temp_notranja(n, tem, λ, ρ, c):
+    """
+    :return: 
+    """
+    #print(tem[n - 1] - 2 * tem[n] + tem[n + 1])
+    T_nova = (δ_t*3600 / (ρ * (δ_x**3) * c)) *(λ*δ_x*(tem[n-1] - 2*tem[n] + tem[n+1])) + tem[n]
+    return T_nova
+
+def temp_sredina(n, tem, λ_1, λ_2 , ρ, c_1, c_2):
+    T_nova = (δ_t*3600 / (ρ * δ_x**3 * (c_1+c_2)/2)) *(δ_x*(λ_2*(tem[n-1]-tem[n]) +λ_1*(tem[n+1]-tem[n]))) + tem[n]
+    return T_nova
+
+def temp_stena_zun(n, tem, trenutni_cas, λ, α, ρ, c):
+    """
+    sevanje + konvekcija + prevod
+    :return:
+    """
+    #print((λ*(tem[n-1]-tem[n])*δ_x +α*δ_x**2 *(T_nes1-tem[n])+ϵ_1*σ*δ_x**2 *((T_nes1+273)**4 - (tem[n]+273)**4) + sevanje*(1-reflektivnost_m)*δ_x**2))
+    T_nova = (δ_t*3600/(ρ*δ_x**3 * c))*(λ*(tem[n-1]-tem[n])*δ_x +α*δ_x**2 *(T_nes1-tem[n])+
+                                   ϵ_1*σ*δ_x**2 *((T_nes1+273)**4 - (tem[n]+273)**4) + sevanje*(1-reflektivnost_b)*δ_x**2) +tem[n]
+    #tok_v_hiso = α*δ_x**2 *(T_nes2*tem[n])+ ϵ_2*σ*δ_x**2 *(T_nes2**4 - tem[n]**4
+    return T_nova
+
+
+
+
+
+
+
+temperature = np.array([19,22,23,23,24,24,24,25,25])
+temperature_nove = np.zeros(9)
+trenutni_cas = 5
+
+while trenutni_cas < 19:
+    for n,_ in enumerate(temperature):
+        if n == 0:
+            temperature_nove[n], tok = tem_stena_not(n, temperature, trenutni_cas, prevodnost_2, alfa_notranji, ρ_not, c_notranji)
+        elif n == 4:
+            _ = (ρ_not+ ρ_zun)/2
+            temperature_nove[n] = temp_sredina(n, temperature, prevodnost_1, prevodnost_2 , _, c_zunanji, c_notranji)
+        elif n < 4:
+            temperature_nove[n] = temp_notranja(n, temperature, prevodnost_2, ρ_not, c_notranji)
+        elif n == 8:
+            temperature_nove[n] = temp_stena_zun(n, temperature, trenutni_cas, prevodnost_1, alfa_zunanji, ρ_zun, c_zunanji)
+        elif n > 4:
+            temperature_nove[n] = temp_notranja(n, temperature, prevodnost_1, ρ_zun, c_zunanji)
+    temperature = temperature_nove
+    temperature_nove = np.zeros(9)
+    trenutni_cas += 0.001
+    print(tok)
+    print(temperature)
