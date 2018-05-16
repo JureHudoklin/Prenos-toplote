@@ -53,3 +53,35 @@ def fun_sevanje_E(cas):
         return funkcija_sevanja_E(cas)
     else:
         return 0
+
+
+
+"""
+Celice se zacnejo steti pri notranji steni
+temperatura notraj je T_nes2
+Temperatura zunaj T_nes1
+"""
+ρ_not =
+ρ_zun
+δ_x
+δ_t
+c_notranji
+c_zunanji
+prevodnost_notranja
+alfa_notranji
+T_nes2 = 22 + 273.15
+T_nes1 =
+ϵ_2
+ϵ_1
+
+
+def tem_stena(n, tem, trenutni_cas, λ, α, ρ, c)
+    """
+    sevanje + konvekcija + prevod
+    :return:
+    """
+    T_nova = (δ_t/(ρ*δ_x**3 * c))*(λ*(tem[n+1]-tem[n])*δ_x +α*δ_x**2 *(T_nes2*tem[n])+ ϵ_2*σ*δ_x**2 *(T_nes2**4 - tem[n]**4)) +tem[n]
+    tok_v_hiso = α*δ_x**2 *(T_nes2*tem[n])+ ϵ_2*σ*δ_x**2 *(T_nes2**4 - tem[n]**4
+    return T_nova, tok_v_hiso
+
+def temp_notranja(n, tem, trenutni_cas, λ, α, ρ, c)
