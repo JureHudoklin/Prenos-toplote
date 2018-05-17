@@ -27,6 +27,11 @@ def fun_sevanje_S(cas):
     else:
         return 0
 
+
+test = np.linspace(5, 19, 500)
+plt.plot(test,funkcija_sevanja_S(test))
+plt.show()
+
 cas_sevanje_W = np.arange(12,20,1)
 sevanje_W = np.array([0,300,520,700,820,800,500,0])
 funkcija_sevanja_W = interpolate.InterpolatedUnivariateSpline(cas_sevanje_W,sevanje_W)
@@ -37,8 +42,8 @@ def fun_sevanje_W(cas):
         return 0
 
 test = np.linspace(12,19,500)
-#plt.plot(test,funkcija_sevanja_W(test))
-#plt.show()
+plt.plot(test,funkcija_sevanja_W(test))
+plt.show()
 
 
 
@@ -47,13 +52,17 @@ test = np.linspace(12,19,500)
 
 cas_sevanje_E = np.arange(5,14,1)
 sevanje_E = np.array([0,350,700,820,700,550,350,100,0])
-funkcija_sevanja_E = interpolate.InterpolatedUnivariateSpline(cas_sevanje_E, sevanje_E)
+funkcija_sevanja_E = interpolate.InterpolatedUnivariateSpline(cas_sevanje_E,sevanje_E)
 def fun_sevanje_E(cas):
-    if cas > 4 or cas < 13:
+    if cas > 4 or cas < 14:
         return funkcija_sevanja_E(cas)
     else:
         return 0
 
+test = np.linspace(5, 19, 500)
+plt.plot(test,funkcija_sevanja_E(test))
+plt.plot(cas_sevanje_E,sevanje_E)
+plt.show()
 
 
 """
@@ -117,9 +126,26 @@ def fn_temperatura(trenutni_cas):
 
 
 
-
-
 def nove_N(temperature, trenutni_cas):
+    temperature_nove = np.zeros(9)
+    for m,_ in enumerate(temperature):
+        if m == 0:
+            temperature_nove[m], tok = tem_stena_not(m, temperature, prevodnost_2, alfa_notranji, ρ_not, c_notranji)
+        elif m == 3:
+            _ = (ρ_not+ ρ_zun)/2
+            temperature_nove[m] = temp_sredina(m, temperature, prevodnost_1, prevodnost_2 , _, c_zunanji, c_notranji)
+        elif m < 3:
+            temperature_nove[m] = temp_notranja(m, temperature, prevodnost_2, ρ_not, c_notranji)
+        elif m == 8:
+            temperature_nove[m] = temp_stena_zun(m, temperature, prevodnost_1, alfa_zunanji, ρ_zun, c_zunanji, 0, fn_temperatura(trenutni_cas))
+        elif m > 3:
+            temperature_nove[m] = temp_notranja(m, temperature, prevodnost_1, ρ_zun, c_zunanji)
+    return tok, temperature_nove
+    #print(temperature)
+
+def nove_S(temperature, trenutni_cas):
+    #print("neki")
+    temperature_nove = np.zeros(9)
     for n,_ in enumerate(temperature):
         if n == 0:
             temperature_nove[n], tok = tem_stena_not(n, temperature, prevodnost_2, alfa_notranji, ρ_not, c_notranji)
@@ -129,42 +155,20 @@ def nove_N(temperature, trenutni_cas):
         elif n < 3:
             temperature_nove[n] = temp_notranja(n, temperature, prevodnost_2, ρ_not, c_notranji)
         elif n == 8:
-            temperature_nove[n] = temp_stena_zun(n, temperature, prevodnost_1, alfa_zunanji, ρ_zun, c_zunanji, 0, fn_temperatura(trenutni_cas))
+            temperature_nove[n] = temp_stena_zun(n, temperature, prevodnost_1, alfa_zunanji, ρ_zun, c_zunanji, fun_sevanje_S(trenutni_cas), fn_temperatura(trenutni_cas))
         elif n > 3:
             temperature_nove[n] = temp_notranja(n, temperature, prevodnost_1, ρ_zun, c_zunanji)
-    temperature = temperature_nove
-    #temperature_nove = np.zeros(9)
-    #trenutni_cas += 0.001
-
+        #print(trenutni_cas)
+        #print(sevanje_S(trenutni_cas),"sevanje")
     return tok, temperature_nove
-    #print(temperature)
 
-def nove_S(temperature, trenutni_cas):
-    for n,_ in enumerate(temperature):
-        if n == 0:
-            temperature_nove[n], tok = tem_stena_not(n, temperature, trenutni_cas, prevodnost_2, alfa_notranji, ρ_not, c_notranji)
-        elif n == 3:
-            _ = (ρ_not+ ρ_zun)/2
-            temperature_nove[n] = temp_sredina(n, temperature, prevodnost_1, prevodnost_2 , _, c_zunanji, c_notranji)
-        elif n < 3:
-            temperature_nove[n] = temp_notranja(n, temperature, prevodnost_2, ρ_not, c_notranji)
-        elif n == 8:
-            temperature_nove[n] = temp_stena_zun(n, temperature, prevodnost_1, alfa_zunanji, ρ_zun, c_zunanji, sevanje_S(trenutni_cas), fn_temperatura(trenutni_cas))
-        elif n > 3:
-            temperature_nove[n] = temp_notranja(n, temperature, prevodnost_1, ρ_zun, c_zunanji)
-    temperature = temperature_nove
-    #temperature_nove = np.zeros(9)
-    #trenutni_cas += 0.001
-
-    return tok, temperature_nove
-    #print(tok)
-    #print(temperature)
 
 
 def nove_E(temperature, trenutni_cas):
+    temperature_nove = np.zeros(9)
     for n, _ in enumerate(temperature):
         if n == 0:
-            temperature_nove[n], tok = tem_stena_not(n, temperature, trenutni_cas, prevodnost_2, alfa_notranji, ρ_not,
+            temperature_nove[n], tok = tem_stena_not(n, temperature,  prevodnost_2, alfa_notranji, ρ_not,
                                                      c_notranji)
         elif n == 3:
             _ = (ρ_not + ρ_zun) / 2
@@ -173,22 +177,20 @@ def nove_E(temperature, trenutni_cas):
             temperature_nove[n] = temp_notranja(n, temperature, prevodnost_2, ρ_not, c_notranji)
         elif n == 8:
             temperature_nove[n] = temp_stena_zun(n, temperature, prevodnost_1, alfa_zunanji, ρ_zun, c_zunanji,
-                                                 sevanje_E(trenutni_cas), fn_temperatura(trenutni_cas))
+                                                 fun_sevanje_E(trenutni_cas), fn_temperatura(trenutni_cas))
         elif n > 3:
             temperature_nove[n] = temp_notranja(n, temperature, prevodnost_1, ρ_zun, c_zunanji)
-    temperature = temperature_nove
-    # temperature_nove = np.zeros(9)
-    # trenutni_cas += 0.001
-
+        print(fun_sevanje_E(trenutni_cas))
     return tok, temperature_nove
     # print(tok)
     # print(temperature)
 
 
 def nove_W(temperature, trenutni_cas):
+    temperature_nove = np.zeros(9)
     for n, _ in enumerate(temperature):
         if n == 0:
-            temperature_nove[n], tok = tem_stena_not(n, temperature, trenutni_cas, prevodnost_2, alfa_notranji, ρ_not,
+            temperature_nove[n], tok = tem_stena_not(n, temperature, prevodnost_2, alfa_notranji, ρ_not,
                                                      c_notranji)
         elif n == 3:
             _ = (ρ_not + ρ_zun) / 2
@@ -197,13 +199,9 @@ def nove_W(temperature, trenutni_cas):
             temperature_nove[n] = temp_notranja(n, temperature, prevodnost_2, ρ_not, c_notranji)
         elif n == 8:
             temperature_nove[n] = temp_stena_zun(n, temperature, prevodnost_1, alfa_zunanji, ρ_zun, c_zunanji,
-                                                 sevanje_W(trenutni_cas), fn_temperatura(trenutni_cas))
+                                                 fun_sevanje_W(trenutni_cas), fn_temperatura(trenutni_cas))
         elif n > 3:
             temperature_nove[n] = temp_notranja(n, temperature, prevodnost_1, ρ_zun, c_zunanji)
-    temperature = temperature_nove
-    # temperature_nove = np.zeros(9)
-    # trenutni_cas += 0.001
-
     return tok, temperature_nove
     # print(tok)
     # print(temperature)
