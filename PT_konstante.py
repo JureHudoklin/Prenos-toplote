@@ -135,7 +135,7 @@ while trenutni_cas < 19:
         elif n > 4:
             temperature_nove[n] = temp_notranja(n, temperature, prevodnost_1, ρ_zun, c_zunanji)
     temperature = temperature_nove
-    temperature_nove = np.zeros(9)
+    #temperature_nove = np.zeros(9)
     trenutni_cas += 0.001
     print(tok)
     print(temperature)
