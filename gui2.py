@@ -21,20 +21,27 @@ def izris(temperature_N,temperature_S,temperature_E,temperature_W):
         for n in range(0, 9):
             # print(self.temperature_N,"temperature")
             # print(n)
-            _ = int(temperature_N[n])
-            c_N = (255 - (_ - 19) * 5, 0 + (_ - 19) * 5, 0)
-            _ = int(temperature_S[n])
-            c_S = (255 - (_ - 19) * 5, 0 + (_ - 19) * 5, 0)
-            _ = int(temperature_E[n])
-            c_E = (255 - (_ - 19) * 5, 0 + (_ - 19) * 5, 0)
-            _ = int(temperature_W[n])
-            c_W = (255 - (_ - 19) * 5, 0 + (_ - 19) * 5, 0)
-            mycolor_N = '#%02x%02x%02x' % c_N
-            mycolor_S = '#%02x%02x%02x' % c_S
-            mycolor_E = '#%02x%02x%02x' % c_E
-            mycolor_W = '#%02x%02x%02x' % c_W
+            t_max = 50
+            t_min = 18
 
-            stran_odmik = 300
+            _ = temperature_N[n]
+            c_N = (_-t_min)/(t_max-t_min)
+            mycolor_N = round(255 * c_N, -1)
+            mycolor_N = (mycolor_N,255-mycolor_N,0)
+            _ = temperature_S[n]
+            c_S = (_-t_min)/(t_max-t_min)
+            mycolor_S = round(255 * c_S, -1)
+            mycolor_S = (mycolor_S, 255 - mycolor_S, 0)
+            _ = temperature_E[n]
+            c_E = (_-t_min)/(t_max-t_min)
+            mycolor_E = round(255 * c_E, -1)
+            mycolor_E = (mycolor_E, 255 - mycolor_E, 0)
+            _ = temperature_W[n]
+            c_W = (_-t_min)/(t_max-t_min)
+            mycolor_W = round(255 * c_W, -1)
+            mycolor_W = (mycolor_W, 255 - mycolor_W, 0)
+
+            stran_odmik = 150
             plus_x = vel_ch * celice + stran_odmik
             plus_y = vel_ch * celice + stran_odmik
             x0 = plus_x + x * vel_cs
@@ -57,16 +64,16 @@ def izris(temperature_N,temperature_S,temperature_E,temperature_W):
             x9 = plus_x + (st_celic + n + 1) * vel_cs
             y9 = plus_y + (x + 1) * vel_cs
 
-            pygame.draw.rect(gameDisplay, c_N, [x0, y0, vel_cs, vel_ch])
-            pygame.draw.rect(gameDisplay, c_S, [x2, y2, vel_cs, vel_ch])
-            pygame.draw.rect(gameDisplay, c_E, [x5, y5, vel_cs, vel_ch])
-            pygame.draw.rect(gameDisplay, c_W, [x8, y8, vel_cs, vel_ch])
+            pygame.draw.rect(gameDisplay, mycolor_N, [x0, y0, vel_cs, vel_ch])
+            pygame.draw.rect(gameDisplay, mycolor_S, [x2, y2, vel_cs, vel_ch])
+            pygame.draw.rect(gameDisplay, mycolor_E, [x8, y8, vel_cs, vel_ch])
+            pygame.draw.rect(gameDisplay, mycolor_W, [x5, y5, vel_cs, vel_ch])
 
 
 def game_loop():
-    temperature_N = np.array([19, 20, 23, 23, 50, 24, 28, 32, 40])
+    temperature_N = np.array([19, 20, 23, 23, 40, 24, 28, 32, 40])
     temperature_S = np.array([19, 22, 23, 23, 24, 24, 24, 25, 10])
-    temperature_E = np.array([19, 22, 23, 50, 24, 24, 24, 25, 20])
+    temperature_E = np.array([19, 22, 23, 40, 24, 24, 24, 25, 20])
     temperature_W = np.array([19, 22, 23, 23, 24, 24, 24, 25, 25])
     dan = 0
     trenutni_cas = 12
@@ -76,14 +83,14 @@ def game_loop():
         if delaj:
             _, temperature_N = pt.nove_N(temperature_N, trenutni_cas)
             _, temperature_S = pt.nove_S(temperature_S, trenutni_cas)
-            _, temperature_W = pt.nove_W(temperature_E, trenutni_cas)
-            _, temperature_E = pt.nove_E(temperature_W, trenutni_cas)
+            _, temperature_W = pt.nove_W(temperature_W, trenutni_cas)
+            _, temperature_E = pt.nove_E(temperature_E, trenutni_cas)
             trenutni_cas += 0.001
             gameDisplay.fill(white)
             izris(temperature_N, temperature_S, temperature_E, temperature_W)
             # test(temperature_N,temperature_S,temperature_E,temperature_W,trenutni_cas)
             print(trenutni_cas)
-            print(temperature_N[-1],temperature_S[-1],temperature_W[-1],temperature_E[-1])
+            print(temperature_N[-1],temperature_S[-1],temperature_E[-1],temperature_W[-1])
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:

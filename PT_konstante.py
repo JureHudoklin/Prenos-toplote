@@ -41,9 +41,9 @@ def fun_sevanje_W(cas):
     else:
         return 0
 
-test = np.linspace(0,24,500)
-plt.plot(test,funkcija_sevanja_W(test))
-plt.show()
+#test = np.linspace(0,24,500)
+#plt.plot(test,funkcija_sevanja_W(test))
+#plt.show()
 
 
 
@@ -51,10 +51,10 @@ plt.show()
 #print(temperature)
 
 cas_sevanje_E = np.arange(5,14,1)
-sevanje_E = np.array([0,350,700,820,700,550,350,100,0])
+sevanje_E = np.array([0,350,700,820,700,550,350, 100,0])
 funkcija_sevanja_E = interpolate.InterpolatedUnivariateSpline(cas_sevanje_E,sevanje_E)
 def fun_sevanje_E(cas):
-    if cas > 4 and cas < 14:
+    if cas > 5 and cas < 13:
         return funkcija_sevanja_E(cas)
 
     else:
@@ -65,7 +65,7 @@ for x in range(0,24,1):
 #test = np.linspace(0, 24, 500)
 #plt.plot(test,funkcija_sevanja_E(test))
 #plt.plot(cas_sevanje_E,sevanje_E)
-plt.show()
+#plt.show()
 
 
 """
@@ -183,7 +183,7 @@ def nove_E(temperature, trenutni_cas):
                                                  fun_sevanje_E(trenutni_cas), fn_temperatura(trenutni_cas))
         elif n > 3:
             temperature_nove[n] = temp_notranja(n, temperature, prevodnost_1, ρ_zun, c_zunanji)
-        print(fun_sevanje_E(trenutni_cas))
+        #print(fun_sevanje_E(trenutni_cas))
     return tok, temperature_nove
     # print(tok)
     # print(temperature)
@@ -205,6 +205,7 @@ def nove_W(temperature, trenutni_cas):
                                                  fun_sevanje_W(trenutni_cas), fn_temperatura(trenutni_cas))
         elif n > 3:
             temperature_nove[n] = temp_notranja(n, temperature, prevodnost_1, ρ_zun, c_zunanji)
+    print(fun_sevanje_W(trenutni_cas))
     return tok, temperature_nove
     # print(tok)
     # print(temperature)
