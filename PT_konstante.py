@@ -22,26 +22,26 @@ cas_sevanje_S = np.arange(5,20,1)
 sevanje_S = np.array([0,50,80,180,310,420,500,520,480,420,300,180,80,50,0])
 funkcija_sevanja_S = interpolate.InterpolatedUnivariateSpline(cas_sevanje_S,sevanje_S)
 def fun_sevanje_S(cas):
-    if cas > 5 or cas < 19:
+    if cas > 5 and cas < 19:
         return funkcija_sevanja_S(cas)
     else:
         return 0
 
 
-test = np.linspace(5, 19, 500)
-plt.plot(test,funkcija_sevanja_S(test))
-plt.show()
+test = np.linspace(0, 24, 500)
+#plt.plot(test,fun_sevanje_S(test))
+#plt.show()
 
 cas_sevanje_W = np.arange(12,20,1)
 sevanje_W = np.array([0,300,520,700,820,800,500,0])
 funkcija_sevanja_W = interpolate.InterpolatedUnivariateSpline(cas_sevanje_W,sevanje_W)
 def fun_sevanje_W(cas):
-    if cas > 12 or cas < 19:
+    if cas > 12 and cas < 19:
         return funkcija_sevanja_W(cas)
     else:
         return 0
 
-test = np.linspace(12,19,500)
+test = np.linspace(0,24,500)
 plt.plot(test,funkcija_sevanja_W(test))
 plt.show()
 
@@ -54,14 +54,17 @@ cas_sevanje_E = np.arange(5,14,1)
 sevanje_E = np.array([0,350,700,820,700,550,350,100,0])
 funkcija_sevanja_E = interpolate.InterpolatedUnivariateSpline(cas_sevanje_E,sevanje_E)
 def fun_sevanje_E(cas):
-    if cas > 4 or cas < 14:
+    if cas > 4 and cas < 14:
         return funkcija_sevanja_E(cas)
+
     else:
         return 0
 
-test = np.linspace(5, 19, 500)
-plt.plot(test,funkcija_sevanja_E(test))
-plt.plot(cas_sevanje_E,sevanje_E)
+for x in range(0,24,1):
+    print(fun_sevanje_E(x))
+#test = np.linspace(0, 24, 500)
+#plt.plot(test,funkcija_sevanja_E(test))
+#plt.plot(cas_sevanje_E,sevanje_E)
 plt.show()
 
 
