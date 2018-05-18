@@ -60,8 +60,8 @@ def fun_sevanje_E(cas):
     else:
         return 0
 
-for x in range(0,24,1):
-    print(fun_sevanje_E(x))
+#for x in range(0,24,1):
+    #print(fun_sevanje_E(x))
 #test = np.linspace(0, 24, 500)
 #plt.plot(test,funkcija_sevanja_E(test))
 #plt.plot(cas_sevanje_E,sevanje_E)
@@ -207,7 +207,7 @@ def nove_W(temperature, trenutni_cas):
                                                  fun_sevanje_W(trenutni_cas), fn_temperatura(trenutni_cas))
         elif n > 3:
             temperature_nove[n] = temp_notranja(n, temperature, prevodnost_1, ρ_zun, c_zunanji)
-    print(fun_sevanje_W(trenutni_cas))
+    #print(fun_sevanje_W(trenutni_cas))
     return tok, temperature_nove
     # print(tok)
     # print(temperature)
