@@ -73,6 +73,7 @@ Celice se zacnejo steti pri notranji steni
 temperatura notraj je T_nes2
 Temperatura zunaj T_nes1
 """
+
 ρ_not = 1200
 ρ_zun = 12
 δ_x = 0.03
@@ -83,11 +84,12 @@ prevodnost_1 = 0.04
 prevodnost_2 = 2
 alfa_notranji = 10
 alfa_zunanji = 50
-T_nes2 = 19
-#T_nes1 = 35
+
+
+T_nes2 = 20
 ϵ_2 = 0.9
 ϵ_1 = 0.9
-#sevanje = 800
+
 σ = 5.67 * 10**-8
 
 
@@ -123,8 +125,8 @@ def temp_stena_zun(n, tem, λ, α, ρ, c, sevanje, T_nes1):
     #tok_v_hiso = α*δ_x**2 *(T_nes2*tem[n])+ ϵ_2*σ*δ_x**2 *(T_nes2**4 - tem[n]**4
     return T_nova
 
-def fn_temperatura(trenutni_cas):
-    return 38
+#def fn_temperatura(trenutni_cas):
+ #   return 38
 
 
 
@@ -209,3 +211,35 @@ def nove_W(temperature, trenutni_cas):
     return tok, temperature_nove
     # print(tok)
     # print(temperature)
+
+temperature_tabela = pd.read_excel('temperature.xlsx')
+temperature_tabela = temperature_tabela.sort_values(by=['cas'])
+temperature_cas = np.array(temperature_tabela['cas'])
+dolzina = len(temperature_cas) // 80
+temperature_cas = temperature_cas[0:dolzina * 80]
+temperature_cas = temperature_cas.reshape(dolzina, 80)
+temperature_cas = [np.average(x) for x in temperature_cas]
+
+temperature_T = np.array(temperature_tabela['T'])
+temperature_T = temperature_T[0:dolzina * 80]
+temperature_T = temperature_T.reshape(dolzina, 80)
+temperature_T = [np.average(x) for x in temperature_T]
+
+temperature_spline = interpolate.UnivariateSpline(temperature_cas, temperature_T)
+
+def fn_temperatura(t):
+    if 0 <= t < 12:
+        return temperature_spline(t) + (t/10) ** 2 * 0.25
+    else:
+        return temperature_spline(t) + (t/10) ** 2 * 0.25 - ((t-12)/10) ** 2 * 0.7
+
+
+"""
+cas_test = np.linspace(0, 24, 100)
+plt.plot(temperature_cas, temperature_T, 'r.')
+plt.plot(cas_test, temperature_spline(cas_test),'b')
+for t in cas_test:
+    print(t, dnevna_temperatura(t))
+    plt.plot(t, dnevna_temperatura(t), 'go')
+plt.show()
+"""
