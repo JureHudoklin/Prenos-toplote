@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-from scipy import interpolate
+from scipy import integrate
 from tkinter import *
 import sys
 import PT_konstante as pt
@@ -10,13 +10,18 @@ import pygame
 
 
 
-def izris(temperature_N,temperature_S,temperature_E,temperature_W):
+
+def izris(temperature_N,temperature_S,temperature_E,temperature_W, temperature_UP):
 
     for x in range(0, st_celic):
         for n in range(0, 9):
             # print(self.temperature_N,"temperature")
             # print(n)
 
+            _ = temperature_UP[n]
+            c_UP = (_-t_min)/(t_max-t_min)
+            mycolor_UP = round(255 * c_UP, -1)
+            mycolor_UP = (mycolor_UP, 255 - mycolor_UP, 0)
 
             _ = temperature_N[n]
             c_N = (_-t_min)/(t_max-t_min)
@@ -35,7 +40,8 @@ def izris(temperature_N,temperature_S,temperature_E,temperature_W):
             mycolor_W = round(255 * c_W, -1)
             mycolor_W = (mycolor_W, 255 - mycolor_W, 0)
 
-
+            x9 = plus_x
+            y9 = 100+vel_ch*(celice-n)
 
             x0 = plus_x + x * vel_cs
             y0 = stran_odmik + (celice - n - 1) * vel_ch
@@ -57,6 +63,9 @@ def izris(temperature_N,temperature_S,temperature_E,temperature_W):
             #x9 = plus_x + (st_celic + n + 1) * vel_cs
             #y9 = plus_y + (x + 1) * vel_cs
 
+            pygame.draw.rect(gameDisplay, mycolor_UP, [x9, y9, vel_cs, vel_ch])
+            pygame.draw.rect(gameDisplay, black, [x9, 110, vel_cs, vel_ch*celice], 2)
+
             pygame.draw.rect(gameDisplay, mycolor_N, [x0, y0, vel_cs, vel_ch])
             pygame.draw.rect(gameDisplay, mycolor_S, [x2, y2, vel_cs, vel_ch])
             pygame.draw.rect(gameDisplay, mycolor_E, [x8, y8, vel_ch, vel_cs])
@@ -67,24 +76,89 @@ def izris(temperature_N,temperature_S,temperature_E,temperature_W):
         T_surS = myfont.render(f"T_sS={round(temperature_S[8],2)}", False, (0, 0, 0))
         T_surE = myfont.render(f"T_sW={round(temperature_W[8],2)}", False, (0, 0, 0))
         T_surW = myfont.render(f"T_sE={round(temperature_E[8],2)}", False, (0, 0, 0))
+        T_surUP = myfont.render(f"T_sUP={round(temperature_UP[8],2)}", False, (0, 0, 0))
+        streha = myfont.render(f"Streha:", False, (0, 0, 0))
+
         gameDisplay.blit(T_surN, ( plus_x+100, stran_odmik-26))
         gameDisplay.blit(T_surS, ( plus_x+100, plus_y + (st_celic*vel_cs + celice * vel_ch)))
-        gameDisplay.blit(T_surE, (5, plus_y+100))
+        gameDisplay.blit(T_surE, (stran_odmik/2, plus_y+100))
         gameDisplay.blit(T_surW, (plus_x + (st_celic * vel_cs + celice * vel_ch), plus_y+100))
+        gameDisplay.blit(T_surUP, (x9, 80))
+        gameDisplay.blit(streha, (x9-80, 130))
+
+def grafi(plot_tok, plot_Ts_inS, plot_Ts_outS,plot_Ts_inN,plot_Ts_outN,plot_Ts_inW,plot_Ts_outW,plot_Ts_inE,plot_Ts_outE,plot_Ts_inUP,plot_Ts_outUP):
+    plot_cas = np.arange(0.1, 24.1, 0.1)
+    skupna_moc = integrate.trapz(plot_tok, dx = 0.001*3600)
+    print(skupna_moc)
+
+    fig = plt.figure()
+    fig.clf()
+
+    ax1 = fig.add_subplot(311)
+    ax2 = fig.add_subplot(312)
+    ax3 = fig.add_subplot(313)
+
+
+    ax1.plot(plot_cas, plot_Ts_inS, label="Ts_S")
+    ax1.plot(plot_cas, plot_Ts_inE, label="Ts_E")
+    ax1.plot(plot_cas, plot_Ts_inW, label="Ts_W")
+    ax1.plot(plot_cas, plot_Ts_inN, label="Ts_N")
+    ax1.plot(plot_cas, plot_Ts_inUP, label="Ts_UP")
+
+    ax2.plot(plot_cas, plot_Ts_outS, label="Ts_S")
+    ax2.plot(plot_cas, plot_Ts_outE, label="Ts_E")
+    ax2.plot(plot_cas, plot_Ts_outW, label="Ts_W")
+    ax2.plot(plot_cas, plot_Ts_outN, label="Ts_N")
+    ax2.plot(plot_cas, plot_Ts_outUP, label="Ts_UP")
+
+    ax3.plot(plot_cas,plot_tok, label="tok")
+    ax1.set_title("Temperatura notranje stene")
+    ax2.set_title("Temperatura zunanje stene")
+    ax3.set_title("Toplotni tok klimatske naprave")
+    fig.suptitle('CC   refleksivnost = 0.2')
+    ax1.set_xlabel("t[h]")
+    ax1.set_ylabel("T[C]")
+    ax2.set_xlabel("t[h]")
+    ax2.set_ylabel("T[C]")
+    ax3.set_xlabel("t[h]")
+    ax3.set_ylabel("tok[W]")
+
+    ax1.set_xlim(0, 24)
+    ax2.set_xlim(0, 24)
+    ax3.set_xlim(0, 24)
+    ax3.legend()
+    ax1.legend()
+    ax2.legend()
+
+    plt.tight_layout()
+    plt.savefig("grafi2.jpg", dpi=500)
+    plt.show()
 
 
 def game_loop():
+    temperature_UP = np.array([19, 22, 23, 23, 24, 24, 24, 25, 20])
     temperature_N = np.array([19, 20, 23, 23, 30, 24, 28, 32, 30])
-    temperature_S = np.array([19, 22, 23, 23, 24, 24, 24, 25, 10])
+    temperature_S = np.array([19, 22, 23, 23, 24, 24, 24, 25, 20])
     temperature_E = np.array([19, 22, 23, 30, 24, 24, 24, 25, 20])
     temperature_W = np.array([19, 22, 23, 23, 24, 24, 24, 25, 25])
     dan = 0
-    trenutni_cas = 2
+    trenutni_cas = 8
     on = True
     delaj = False
     gameDisplay.fill(white)
     pogoj = 0
     kontrastna = (255,255,255)
+    plot_tok = np.array([])
+    plot_Ts_inS = np.array([])
+    plot_Ts_outS = np.array([])
+    plot_Ts_inE = np.array([])
+    plot_Ts_outE = np.array([])
+    plot_Ts_inW = np.array([])
+    plot_Ts_outW = np.array([])
+    plot_Ts_inN = np.array([])
+    plot_Ts_outN = np.array([])
+    plot_Ts_inUP = np.array([])
+    plot_Ts_outUP = np.array([])
 
 
     while on:
@@ -101,6 +175,8 @@ def game_loop():
             tok += _
             _, temperature_E = pt.nove_E(temperature_E, trenutni_cas)
             tok += _
+            _, temperature_UP = pt.nove_UP(temperature_UP, trenutni_cas)
+            tok += _
             trenutni_cas += 0.001
             _ = pt.fn_temperatura(trenutni_cas)
             _ = (_-t_min)/(t_max-t_min)
@@ -116,7 +192,7 @@ def game_loop():
             pygame.draw.polygon(gameDisplay, black, tocke_poligon3)
             pygame.draw.polygon(gameDisplay, black, tocke_poligon4)
 
-            izris(temperature_N, temperature_S, temperature_E, temperature_W)
+            izris(temperature_N, temperature_S, temperature_E, temperature_W, temperature_UP)
                 # test(temperature_N,temperature_S,temperature_E,temperature_W,trenutni_cas)
                 #print(trenutni_cas)
                 #print(temperature_N[1],temperature_S[-1],temperature_E[-1],temperature_W[-1])
@@ -124,9 +200,24 @@ def game_loop():
             pygame.draw.rect(gameDisplay, black, (200, 0, tok/10, 20))
             text_tok = myfont2.render(f"Tok={round(tok,-1)}", False, black)
             gameDisplay.blit(text_tok,(200,22))
+            #print(dan)
+            if dan == 1:
+                if round(trenutni_cas,4) == round(trenutni_cas, 1):
+                    plot_tok = np.append(plot_tok, tok)
+                    plot_Ts_inS = np.append(plot_Ts_inS, temperature_S[0])
+                    plot_Ts_outS = np.append(plot_Ts_outS, temperature_S[-1])
+                    plot_Ts_inN = np.append(plot_Ts_inN, temperature_N[0])
+                    plot_Ts_outN = np.append(plot_Ts_outN, temperature_N[-1])
+                    plot_Ts_inE = np.append(plot_Ts_inE, temperature_E[0])
+                    plot_Ts_outE = np.append(plot_Ts_outE, temperature_E[-1])
+                    plot_Ts_inW = np.append(plot_Ts_inW, temperature_W[0])
+                    plot_Ts_outW = np.append(plot_Ts_outW, temperature_W[-1])
+                    plot_Ts_inUP = np.append(plot_Ts_inUP, temperature_UP[0])
+                    plot_Ts_outUP = np.append(plot_Ts_outUP, temperature_UP[-1])
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                grafi(plot_tok, plot_Ts_inS, plot_Ts_outS,plot_Ts_inN,plot_Ts_outN,plot_Ts_inW,plot_Ts_outW,plot_Ts_inE,plot_Ts_outE,plot_Ts_inUP,plot_Ts_outUP)
                 on = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RIGHT:
@@ -151,8 +242,9 @@ def game_loop():
 
 
 
+
         pygame.display.update()
-        clock.tick(600)
+        clock.tick(300)
 
 pygame.init()
 pygame.font.init() # you have to call this at the start,
@@ -183,11 +275,12 @@ vel_cs = 500
 vel_ch = 10
 celice = 9
 st_celic = 1
-stran_odmik = 120
-display_width = 940
-display_height = 900
-t_max = 40
+stran_odmik = 250
+display_width = 1080
+display_height = 1080
+t_max = 43
 t_min = 15
+
 
 myfont = pygame.font.SysFont('Arial', 25)
 myfont2 = pygame.font.SysFont('Arial', 30)
@@ -207,4 +300,7 @@ pygame.display.set_caption("SIMULACIJA")
 clock = pygame.time.Clock()
 game_loop()
 pygame.quit()
+print("neki")
+
 quit()
+

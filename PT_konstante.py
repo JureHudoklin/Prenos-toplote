@@ -18,6 +18,17 @@ reflektivnost_n = 0.65
 reflektivnost_m = 0.85 # https://www.epa.gov/sites/production/files/2014-08/documents/energy_and_buildings_volume_39_0.pdf str 3
 
 #Definiram fucnkcijo za sevanje
+cas_sevanje_UP = np.arange(5,20,1)
+sevanje_UP = np.array([0,400,800,850,900,920,960,960,950,920,880,800,700,400,0])
+funkcija_sevanja_UP = interpolate.InterpolatedUnivariateSpline(cas_sevanje_UP,sevanje_UP)
+def fun_sevanje_UP(cas):
+    if cas > 5 and cas < 19:
+        return funkcija_sevanja_UP(cas)
+    else:
+        return 0
+
+
+
 cas_sevanje_S = np.arange(5,20,1)
 sevanje_S = np.array([0,50,80,180,310,420,500,520,480,420,300,180,80,50,0])
 funkcija_sevanja_S = interpolate.InterpolatedUnivariateSpline(cas_sevanje_S,sevanje_S)
@@ -121,7 +132,7 @@ def temp_stena_zun(n, tem, λ, α, ρ, c, sevanje, T_nes1):
     """
     #print((λ*(tem[n-1]-tem[n])*δ_x +α*δ_x**2 *(T_nes1-tem[n])+ϵ_1*σ*δ_x**2 *((T_nes1+273)**4 - (tem[n]+273)**4) + sevanje*(1-reflektivnost_m)*δ_x**2))
     T_nova = (δ_t*3600/(ρ*δ_x**3 * c))*(λ*(tem[n-1]-tem[n])*δ_x +α*δ_x**2 *(T_nes1-tem[n])+
-                                   ϵ_1*σ*δ_x**2 *((T_nes1+273)**4 - (tem[n]+273)**4) + sevanje*(1-reflektivnost_b)*δ_x**2) +tem[n]
+                                   ϵ_1*σ*δ_x**2 *((T_nes1+273)**4 - (tem[n]+273)**4) + sevanje*(1-reflektivnost_m)*δ_x**2) +tem[n]
     #tok_v_hiso = α*δ_x**2 *(T_nes2*tem[n])+ ϵ_2*σ*δ_x**2 *(T_nes2**4 - tem[n]**4
     return T_nova
 
@@ -129,6 +140,23 @@ def temp_stena_zun(n, tem, λ, α, ρ, c, sevanje, T_nes1):
  #   return 38
 
 
+def nove_UP(temperature, trenutni_cas):
+    temperature_nove = np.zeros(9)
+    for n,_ in enumerate(temperature):
+        if n == 0:
+            temperature_nove[n], tok = tem_stena_not(n, temperature, prevodnost_2, alfa_notranji, ρ_not, c_notranji)
+        elif n == 3:
+            _ = (ρ_not+ ρ_zun)/2
+            temperature_nove[n] = temp_sredina(n, temperature, prevodnost_1, prevodnost_2 , _, c_zunanji, c_notranji)
+        elif n < 3:
+            temperature_nove[n] = temp_notranja(n, temperature, prevodnost_2, ρ_not, c_notranji)
+        elif n == 8:
+            temperature_nove[n] = temp_stena_zun(n, temperature, prevodnost_1, alfa_zunanji, ρ_zun, c_zunanji, fun_sevanje_UP(trenutni_cas), fn_temperatura(trenutni_cas))
+        elif n > 3:
+            temperature_nove[n] = temp_notranja(n, temperature, prevodnost_1, ρ_zun, c_zunanji)
+        #print(trenutni_cas)
+        #print(sevanje_S(trenutni_cas),"sevanje")
+    return tok, temperature_nove
 
 
 def nove_N(temperature, trenutni_cas):
